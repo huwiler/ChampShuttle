@@ -61,7 +61,11 @@
                 continue;
             }
             
-            CCTweet *tweet = [[CCTweet alloc] initWithID:obj[@"_id"] twitterID:obj[@"twitter_id"] link:obj[@"link"] screenName:obj[@"screen_name"] text:obj[@"text"] createdAt:obj[@"created_at"]];
+            UIImage *tweetImage = [obj[@"image"] length] > 0 ? [
+                UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:obj[@"image"]]]
+            ] : nil;
+            
+            CCTweet *tweet = [[CCTweet alloc] initWithID:obj[@"_id"] twitterID:obj[@"twitter_id"] link:obj[@"link"] screenName:obj[@"screen_name"] text:obj[@"text"] createdAt:obj[@"created_at"] image:tweetImage];
             
             [self.tweets addObject:tweet];
             
@@ -153,8 +157,9 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     CCTweet *tweet = [self.tweets objectAtIndex:indexPath.row];
+    CGFloat imageHeight = tweet.image ? 135.0 : 0.0;
     CGFloat textHeight = [self getLabelRectForText:tweet.text].size.height;
-    CGFloat rowHeight = 32.0 + textHeight;
+    CGFloat rowHeight = 32.0 + textHeight + imageHeight;
     return rowHeight > 70.0 ? rowHeight : 80.0;
 }
 
@@ -165,8 +170,9 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:tweet.screenName forIndexPath:indexPath];
     
-    UILabel *dateLabel = (UILabel *)[cell viewWithTag:2];
     UILabel *textLabel = (UILabel *)[cell viewWithTag:1];
+    UILabel *dateLabel = (UILabel *)[cell viewWithTag:2];
+    UIImageView *imageView = (UIImageView *)[cell viewWithTag:3];
     
     // Display date like m/d e.g. "Apr 23"
     NSDate *createdAt = [NSDate dateWithTimeIntervalSince1970:[tweet.createdAt doubleValue]];
@@ -183,6 +189,13 @@
     
     // Calculate new frames for our Labels using our CGRect calculator
     textLabel.frame = [self getLabelRectForText:tweet.text];
+
+    CGRect imageRect = imageView.frame;
+    imageRect.origin.y = textLabel.frame.size.height + textLabel.frame.origin.y + 10;
+    imageView.frame = imageRect;
+    
+    imageView.image = tweet.image;
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
     
     return cell;
     

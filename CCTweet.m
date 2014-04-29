@@ -10,7 +10,7 @@
 
 @implementation CCTweet
 
-- (id)initWithID:(NSString *)champlainID twitterID:(NSString *)twitterID link:(NSString *)link screenName:(NSString *)screenName text:(NSString *)text createdAt:(NSString *)createdAt {
+- (id)initWithID:(NSString *)champlainID twitterID:(NSString *)twitterID link:(NSString *)link screenName:(NSString *)screenName text:(NSString *)text createdAt:(NSString *)createdAt image:(UIImage *)image {
     
     self = [super init];
     
@@ -22,6 +22,7 @@
         _screenName = screenName;
         _text = text;
         _createdAt = createdAt;
+        _image = image;
         
         return self;
         

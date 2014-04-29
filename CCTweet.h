@@ -16,7 +16,8 @@
 @property (nonatomic, copy) NSString *screenName;
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic, copy) NSString *createdAt;
+@property (nonatomic, strong) UIImage *image;
 
-- (id)initWithID:(NSString *)champlainID twitterID:(NSString *)twitterID link:(NSString *)link screenName:(NSString *)screenName text:(NSString *)text createdAt:(NSString *)createdAt;
+- (id)initWithID:(NSString *)champlainID twitterID:(NSString *)twitterID link:(NSString *)link screenName:(NSString *)screenName text:(NSString *)text createdAt:(NSString *)createdAt image:(UIImage *)image;
 
 @end
