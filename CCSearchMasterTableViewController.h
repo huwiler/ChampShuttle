@@ -7,7 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CCTableViewController.h"
 
-@interface CCSearchMasterTableViewController : UITableViewController
+@interface CCSearchMasterTableViewController : CCTableViewController
+
+@property (copy, nonatomic) NSString *query;
+@property (nonatomic, strong) NSMutableArray *searchResults;
 
 @end

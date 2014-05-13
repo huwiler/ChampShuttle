@@ -9,12 +9,14 @@
 #import "CCRootViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "AFNetworking.h"
+#import "CCSearchMasterTableViewController.h"
 
 @interface CCRootViewController ()
 
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (weak, nonatomic) IBOutlet UILabel *tweetCountLabel;
 @property (weak, nonatomic) IBOutlet UILabel *blogCountLabel;
+@property (strong, nonatomic) UISearchBar *searchBar;
 
 @end
 
@@ -29,12 +31,12 @@
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     
     // Add a Search Bar to the Navigation Controller on this page
-    UISearchBar *searchBar = [UISearchBar new];
-    searchBar.delegate = self;
-    searchBar.placeholder = @"Search Champlain";
-    searchBar.showsBookmarkButton = NO;
-    [searchBar sizeToFit];
-    self.navigationItem.titleView = searchBar;
+    self.searchBar = [UISearchBar new];
+    self.searchBar.delegate = self;
+    self.searchBar.placeholder = @"Search Champlain";
+    self.searchBar.showsBookmarkButton = NO;
+    [self.searchBar sizeToFit];
+    self.navigationItem.titleView = self.searchBar;
     
     // Set frame of our ScrollView to the size of the screen then adjust to accomodate
     // Navigation Bar (44pts) and Status Bar (20pts) (64pts total)
@@ -126,6 +128,7 @@
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
     [searchBar resignFirstResponder];
+    [self performSegueWithIdentifier:@"search" sender:self];
 }
 
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
@@ -139,15 +142,17 @@
     [super didReceiveMemoryWarning];
 }
 
-/*
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    if ([[segue identifier] isEqualToString:@"search"]) {
+        CCSearchMasterTableViewController *search = [segue destinationViewController];
+        search.query = self.searchBar.text;
+    }
 }
-*/
+
 
 @end
