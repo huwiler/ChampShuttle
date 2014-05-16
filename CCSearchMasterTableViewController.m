@@ -12,6 +12,9 @@
 
 @interface CCSearchMasterTableViewController ()
 
+- (NSArray *) getDirectoryFramesAtIndexPath:(NSIndexPath *)indexPath;
+- (CGRect)getLabelRectForString:(NSString *)string font:(UIFont *)font constraint:(CGSize)constraint xPosition:(CGFloat)x yPosition:(CGFloat)y;
+
 @end
 
 @implementation CCSearchMasterTableViewController
@@ -158,7 +161,6 @@
     
 }
 
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -180,51 +182,97 @@
 
 }
 
-// This method uses our blog instances to determine the corresponding Table Cell
-// height.  We use our custom getLabelRectForString method to calculate the height
-// of each Label and add them together along with the image (if one is present)
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    /*CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
-    CGFloat imageHeight = blog.image ? 130.0 : 0.0;
-    CGFloat titleHeight = [self getLabelRectForString:blog.title withFontSize:12.0].size.height;
-    CGFloat descriptionHeight = [self getLabelRectForString:blog.description withFontSize:11.0].size.height;
-    CGFloat authorHeight = [self getLabelRectForString:blog.author withFontSize:11.0].size.height;
-    return (imageHeight + titleHeight + authorHeight + descriptionHeight + 20.0);*/
-    return 50.0;
-}
-
-// This function is used to calculate the size of our Labels which is required
-// by our Table View delegate methods in order to calculate the height of each cell
-// as well as positioning labels relative to one another.
-- (CGRect)getLabelRectForString:(NSString *)string withFontSize:(CGFloat)fontSize {
+- (CGRect)getLabelRectForString:(NSString *)string font:(UIFont *)font constraint:(CGSize)constraint xPosition:(CGFloat)x yPosition:(CGFloat)y {
     
-    // Max width and height of our Labels.  We are saying that at most labels
-    // can have a 273 width; however, they can grow infinitely high depending
-    // on content.
-    CGSize constraint = CGSizeMake(273.0, CGFLOAT_MAX);
+    NSAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:string attributes:@{NSFontAttributeName: font, NSForegroundColorAttributeName: [UIColor lightGrayColor]}];
     
-    // Attributed Strings manage NSStrings and their associated set of attributes.
-    // It also has useful CGRect calculator functions that we can use to determine
-    // the size of a label within our constraint.  This will be our key to
-    // positioning and sizing our UILabels as well as calculating our Table Cell
-    // height.
-    NSAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString:string attributes:@{NSFontAttributeName: [UIFont systemFontOfSize: fontSize], NSForegroundColorAttributeName: [UIColor lightGrayColor]}];
-    
-    // This is were the calculation happens.  Using the Attributed string's
-    // boundingRectWithSize and the bounding box constraint, we generate a rect
-    // with an accurate height for a UILabel containing our text.
     CGRect rect = [attrString boundingRectWithSize:constraint options:(NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading) context:nil];
     
-    // Here we set some defaults.  Origin represents (x,y) coordinates within
-    // the parent view (the Table View Cell).  Size represents the width.
-    // Our rect calculation above set width to the minimum size required to hold
-    // our content.  Instead, we want to reset this back to the full width
-    // of the original Label.
-    rect.origin.x = 7;
+    rect.origin.y = y;
+    rect.origin.x = x;
     rect.size.width = constraint.width;
     
     return rect;
+}
+
+- (NSArray *) getDirectoryFramesAtIndexPath:(NSIndexPath *)indexPath
+{
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
+    UIFont *headerFont = [UIFont fontWithName:@"HelveticaNeue" size:14.0];
+    UIFont *normalFont = [UIFont fontWithName:@"HelveticaNeue-Thin" size:14.0];
+    CGSize constraint;
+    CGFloat nextViewYPosition = 0.0;
+    CGFloat cellSpacing = 4.0;
+    
+    // Set Name
+    NSString *name = [NSString stringWithFormat:@"%@ %@", searchResult.data[@"firstName"], searchResult.data[@"lastName"]];
+    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    
+    nameLabel.font = headerFont;
+    nameLabel.layer.borderColor = [UIColor blackColor].CGColor;
+    nameLabel.layer.borderWidth = 1.0f;
+    nameLabel.text = name;
+    
+    CGFloat yPosition = 5.0;
+    CGFloat xPosition;
+    
+    if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
+        constraint = CGSizeMake(143.0, CGFLOAT_MAX);
+        xPosition = 109.0;
+    }
+    else {
+        constraint = CGSizeMake(243.0, CGFLOAT_MAX);
+        xPosition = 9.0;
+    }
+    nameLabel.frame = [self getLabelRectForString:name font:headerFont constraint:constraint xPosition:xPosition yPosition:yPosition];
+    
+    nextViewYPosition = nameLabel.frame.origin.y + nameLabel.frame.size.height + cellSpacing;
+    
+    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    
+    for (NSString *title in searchResult.data[@"title"]) {
+        
+        titleLabel.font = normalFont;
+        titleLabel.layer.borderColor = [UIColor blackColor].CGColor;
+        titleLabel.layer.borderWidth = 1.0f;
+        titleLabel.text = title;
+        
+        CGSize constraint;
+        CGFloat yPosition = nextViewYPosition;
+        CGFloat xPosition;
+        if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
+            constraint = CGSizeMake(143.0, CGFLOAT_MAX);
+            xPosition = 109.0;
+        }
+        else {
+            constraint = CGSizeMake(243.0, CGFLOAT_MAX);
+            xPosition = 9.0;
+        }
+        
+        titleLabel.frame = [self getLabelRectForString:title font:normalFont constraint:constraint xPosition:xPosition yPosition:yPosition];
+        
+        nextViewYPosition += titleLabel.frame.size.height + cellSpacing;
+        
+    }
+    
+    return @[nameLabel, titleLabel];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
+    
+    if ([searchResult.type isEqualToString:@"directory"]) {
+        
+        NSArray *labels = [self getDirectoryFramesAtIndexPath:indexPath];
+        UILabel *lastLabel = (UILabel *)[labels lastObject];
+        
+        return lastLabel.frame.origin.y + lastLabel.frame.size.height + 5.0;
+    }
+    else {
+        return 50.0;
+    }
     
 }
 
@@ -233,11 +281,20 @@
     
     CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
     UITableViewCell *cell;
+    CGFloat cellSpacing = 4.0;
     
     NSLog(@"type: %@", searchResult.type);
     
     if ([searchResult.type isEqualToString:@"directory"]) {
+        
         cell = [tableView dequeueReusableCellWithIdentifier:@"directory" forIndexPath:indexPath];
+        
+        NSArray *labels = [self getDirectoryFramesAtIndexPath:indexPath];
+        
+        for (UILabel *label in labels) {
+            [[cell contentView] addSubview:label];
+        }
+        
     }
     else if ([searchResult.type isEqualToString:@"pages"]) {
         cell = [tableView dequeueReusableCellWithIdentifier:@"pages" forIndexPath:indexPath];
@@ -247,6 +304,7 @@
     }
     
     return cell;
+    
 }
 
 
