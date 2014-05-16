@@ -10,6 +10,8 @@
 #import "AFNetworking.h"
 #import "CCSearchResult.h"
 
+#define CELLSPACING 4.0
+
 @interface CCSearchMasterTableViewController ()
 
 - (NSArray *) getDirectoryFramesAtIndexPath:(NSIndexPath *)indexPath;
@@ -202,7 +204,7 @@
     UIFont *normalFont = [UIFont fontWithName:@"HelveticaNeue-Thin" size:14.0];
     CGSize constraint;
     CGFloat nextViewYPosition = 0.0;
-    CGFloat cellSpacing = 4.0;
+    NSMutableArray *labelList = [NSMutableArray new];
     
     // Set Name
     NSString *name = [NSString stringWithFormat:@"%@ %@", searchResult.data[@"firstName"], searchResult.data[@"lastName"]];
@@ -226,11 +228,13 @@
     }
     nameLabel.frame = [self getLabelRectForString:name font:headerFont constraint:constraint xPosition:xPosition yPosition:yPosition];
     
-    nextViewYPosition = nameLabel.frame.origin.y + nameLabel.frame.size.height + cellSpacing;
+    [labelList addObject:nameLabel];
     
-    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    nextViewYPosition = nameLabel.frame.origin.y + nameLabel.frame.size.height + CELLSPACING;
     
     for (NSString *title in searchResult.data[@"title"]) {
+        
+        UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
         
         titleLabel.font = normalFont;
         titleLabel.layer.borderColor = [UIColor blackColor].CGColor;
@@ -251,11 +255,14 @@
         
         titleLabel.frame = [self getLabelRectForString:title font:normalFont constraint:constraint xPosition:xPosition yPosition:yPosition];
         
-        nextViewYPosition += titleLabel.frame.size.height + cellSpacing;
+        [labelList addObject:titleLabel];
+        
+        nextViewYPosition += titleLabel.frame.size.height + CELLSPACING;
         
     }
     
-    return @[nameLabel, titleLabel];
+    return labelList;
+    
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -268,7 +275,7 @@
         NSArray *labels = [self getDirectoryFramesAtIndexPath:indexPath];
         UILabel *lastLabel = (UILabel *)[labels lastObject];
         
-        return lastLabel.frame.origin.y + lastLabel.frame.size.height + 5.0;
+        return lastLabel.frame.origin.y + lastLabel.frame.size.height + CELLSPACING;
     }
     else {
         return 50.0;
@@ -281,9 +288,6 @@
     
     CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
     UITableViewCell *cell;
-    CGFloat cellSpacing = 4.0;
-    
-    NSLog(@"type: %@", searchResult.type);
     
     if ([searchResult.type isEqualToString:@"directory"]) {
         
