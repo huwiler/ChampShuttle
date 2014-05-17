@@ -10,10 +10,16 @@
 #import "AFNetworking.h"
 #import "CCSearchResult.h"
 
-#define CELLSPACING 4.0
+// Used to indicate amount of space between each view in a cell
+#define CELL_VIEW_MARGIN 2.0
+
+// Used to set fonts on search results
+#define HEADER_FONT [UIFont fontWithName:@"HelveticaNeue" size:14.0]
+#define NORMAL_FONT [UIFont fontWithName:@"HelveticaNeue-Thin" size:13.0]
 
 @interface CCSearchMasterTableViewController ()
 
+// Helper functions to reduce amount of redundant code required in cellForRowAtIndexPath and heightForRowAtIndexPath
 - (NSArray *) getDirectoryFramesAtIndexPath:(NSIndexPath *)indexPath;
 - (CGRect)getLabelRectForString:(NSString *)string font:(UIFont *)font constraint:(CGSize)constraint xPosition:(CGFloat)x yPosition:(CGFloat)y;
 
@@ -110,13 +116,16 @@
                          @"lastName": obj[@"lastName"] ? [obj[@"lastName"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @"",
                          @"email": obj[@"email"] ? [obj[@"email"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @"",
                          @"headShot": headShotImage ? headShotImage : [NSNull null],
-                         @"deparment": obj[@"api_department"] ? [obj[@"api_department"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @"",
+                         @"department": obj[@"api_department"] ? [obj[@"api_department"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @"",
                          @"office": obj[@"api_office"] ? [obj[@"api_office"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @"",
                          @"phone": obj[@"api_phone"] ? [obj[@"api_phone"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @"",
                          @"title": titles,
                          @"degrees": degrees,
                          @"homepage": obj[@"api_homepage"] ? [obj[@"api_homepage"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @""
                          };
+                
+                NSLog(@"Data received from search: %@", data);
+                
             }
             else if ([result[@"_type"] isEqualToString:@"featured"]) {
                 
@@ -195,73 +204,105 @@
     rect.size.width = constraint.width;
     
     return rect;
+    
+}
+
+- (UILabel *) getDirectoryLabelForSearchResult:(CCSearchResult *)searchResult string:(NSString *)string font:(UIFont *)font yPosition:(CGFloat)yPosition {
+    
+    CGSize constraint;
+    CGFloat xPosition;
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    
+    // Useful for debuging - allows you to visualize exactually how label frames are positioned
+    //label.layer.borderColor = [UIColor blackColor].CGColor;
+    //label.layer.borderWidth = 1.0f;
+    
+    label.font = font;
+    label.text = string;
+    label.numberOfLines = 0;
+    label.lineBreakMode = NSLineBreakByWordWrapping;
+    CGFloat reduceWidthBy = yPosition > 15.0 ? 0.0 : 30.0;
+    
+    if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
+        constraint = CGSizeMake(175.0 - reduceWidthBy, CGFLOAT_MAX);
+        xPosition = 109.0;
+    }
+    else {
+        constraint = CGSizeMake(275.0 - reduceWidthBy, CGFLOAT_MAX);
+        xPosition = 9.0;
+    }
+    
+    label.frame = [self getLabelRectForString:string font:NORMAL_FONT constraint:constraint xPosition:xPosition yPosition:yPosition];
+    
+    return label;
+    
 }
 
 - (NSArray *) getDirectoryFramesAtIndexPath:(NSIndexPath *)indexPath
 {
+    
     CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
-    UIFont *headerFont = [UIFont fontWithName:@"HelveticaNeue" size:14.0];
-    UIFont *normalFont = [UIFont fontWithName:@"HelveticaNeue-Thin" size:14.0];
-    CGSize constraint;
-    CGFloat nextViewYPosition = 0.0;
-    NSMutableArray *labelList = [NSMutableArray new];
+    
+    CGFloat nextViewYPosition = 9.0;
+    NSMutableArray *viewList = [NSMutableArray new];
+    
+    if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
+        UIImageView *headShot = [[UIImageView alloc] initWithFrame:CGRectMake(8.0, 17.0, 93.0, 119.0)];
+        headShot.image = searchResult.data[@"headShot"];
+        headShot.contentMode = UIViewContentModeScaleAspectFill;
+        [viewList addObject:headShot];
+    }
     
     // Set Name
     NSString *name = [NSString stringWithFormat:@"%@ %@", searchResult.data[@"firstName"], searchResult.data[@"lastName"]];
-    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    
-    nameLabel.font = headerFont;
-    nameLabel.layer.borderColor = [UIColor blackColor].CGColor;
-    nameLabel.layer.borderWidth = 1.0f;
-    nameLabel.text = name;
-    
-    CGFloat yPosition = 5.0;
-    CGFloat xPosition;
-    
-    if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
-        constraint = CGSizeMake(143.0, CGFLOAT_MAX);
-        xPosition = 109.0;
-    }
-    else {
-        constraint = CGSizeMake(243.0, CGFLOAT_MAX);
-        xPosition = 9.0;
-    }
-    nameLabel.frame = [self getLabelRectForString:name font:headerFont constraint:constraint xPosition:xPosition yPosition:yPosition];
-    
-    [labelList addObject:nameLabel];
-    
-    nextViewYPosition = nameLabel.frame.origin.y + nameLabel.frame.size.height + CELLSPACING;
+    UILabel *nameLabel = [self getDirectoryLabelForSearchResult:searchResult string:name font:HEADER_FONT yPosition:nextViewYPosition];
+    [viewList addObject:nameLabel];
+    nextViewYPosition = nameLabel.frame.origin.y + nameLabel.frame.size.height + CELL_VIEW_MARGIN;
     
     for (NSString *title in searchResult.data[@"title"]) {
-        
-        UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        
-        titleLabel.font = normalFont;
-        titleLabel.layer.borderColor = [UIColor blackColor].CGColor;
-        titleLabel.layer.borderWidth = 1.0f;
-        titleLabel.text = title;
-        
-        CGSize constraint;
-        CGFloat yPosition = nextViewYPosition;
-        CGFloat xPosition;
-        if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
-            constraint = CGSizeMake(143.0, CGFLOAT_MAX);
-            xPosition = 109.0;
-        }
-        else {
-            constraint = CGSizeMake(243.0, CGFLOAT_MAX);
-            xPosition = 9.0;
-        }
-        
-        titleLabel.frame = [self getLabelRectForString:title font:normalFont constraint:constraint xPosition:xPosition yPosition:yPosition];
-        
-        [labelList addObject:titleLabel];
-        
-        nextViewYPosition += titleLabel.frame.size.height + CELLSPACING;
-        
+        UILabel *titleLabel = [self getDirectoryLabelForSearchResult:searchResult string:title font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:titleLabel];
+        nextViewYPosition += titleLabel.frame.size.height + CELL_VIEW_MARGIN;
     }
     
-    return labelList;
+    if ([searchResult.data[@"department"] length] > 0) {
+        UILabel *departmentLabel = [self getDirectoryLabelForSearchResult:searchResult string:searchResult.data[@"department"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:departmentLabel];
+        nextViewYPosition = departmentLabel.frame.origin.y + departmentLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    if ([searchResult.data[@"office"] length] > 0) {
+        UILabel *officeLabel = [self getDirectoryLabelForSearchResult:searchResult string:searchResult.data[@"office"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:officeLabel];
+        nextViewYPosition = officeLabel.frame.origin.y + officeLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    if ([searchResult.data[@"email"] length] > 0) {
+        UILabel *emailLabel = [self getDirectoryLabelForSearchResult:searchResult string:searchResult.data[@"email"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:emailLabel];
+        nextViewYPosition = emailLabel.frame.origin.y + emailLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    if ([searchResult.data[@"phone"] length] > 0) {
+        UILabel *phoneLabel = [self getDirectoryLabelForSearchResult:searchResult string:searchResult.data[@"phone"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:phoneLabel];
+        nextViewYPosition = phoneLabel.frame.origin.y + phoneLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    for (NSString *degree in searchResult.data[@"degrees"]) {
+        UILabel *degreeLabel = [self getDirectoryLabelForSearchResult:searchResult string:degree font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:degreeLabel];
+        nextViewYPosition += degreeLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    if ([searchResult.data[@"homepage"] length] > 0) {
+        UILabel *homepageLabel = [self getDirectoryLabelForSearchResult:searchResult string:searchResult.data[@"homepage"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:homepageLabel];
+        nextViewYPosition = homepageLabel.frame.origin.y + homepageLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    return viewList;
     
 }
 
@@ -275,7 +316,7 @@
         NSArray *labels = [self getDirectoryFramesAtIndexPath:indexPath];
         UILabel *lastLabel = (UILabel *)[labels lastObject];
         
-        return lastLabel.frame.origin.y + lastLabel.frame.size.height + CELLSPACING;
+        return lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
     }
     else {
         return 50.0;
@@ -293,10 +334,10 @@
         
         cell = [tableView dequeueReusableCellWithIdentifier:@"directory" forIndexPath:indexPath];
         
-        NSArray *labels = [self getDirectoryFramesAtIndexPath:indexPath];
+        NSArray *views = [self getDirectoryFramesAtIndexPath:indexPath];
         
-        for (UILabel *label in labels) {
-            [[cell contentView] addSubview:label];
+        for (UIView *view in views) {
+            [[cell contentView] addSubview:view];
         }
         
     }
