@@ -40,7 +40,7 @@
 {
     [super viewDidLoad];
     
-    NSLog(@"Getting to search with %@", self.query);
+    //NSLog(@"Getting to search with %@", self.query);
     
     // Show activity indicator animation in self.overlayView.  This will then
     // be removed once blog summaries have been downloaded.
@@ -71,12 +71,14 @@
         NSDictionary *response = (NSDictionary *)responseObject;
         NSArray *hits = response[@"hits"][@"hits"];
         
+        //NSLog(@"hits: %@", hits);
+        
         for (NSDictionary *result in hits) {
             
             NSDictionary *data;
             NSDictionary *obj = result[@"_source"];
             
-            //NSLog(@"type: %@", result[@"_type"]);
+            //NSLog(@"obj: %@", obj);
             
             if ([result[@"_type"] isEqualToString:@"directory"]) {
                 
@@ -124,12 +126,12 @@
                          @"homepage": obj[@"api_homepage"] ? [obj[@"api_homepage"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] : @""
                          };
                 
-                NSLog(@"Data received from search: %@", data);
+                //NSLog(@"Data received from search: %@", data);
                 
             }
             else if ([result[@"_type"] isEqualToString:@"featured"]) {
                 
-                if (!obj[@"loc"] || !obj[@"featured_title"] || !obj[@"featured_abstract"]) {
+                if (!obj[@"loc"] || [obj[@"loc"] length] == 0 || !obj[@"featured_title"] || [obj[@"featured_title"] length] == 0 || !obj[@"featured_abstract"] || [obj[@"featured_abstract"] length] == 0) {
                     continue;
                 }
                 
@@ -138,10 +140,13 @@
                          @"title": [obj[@"featured_title"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
                          @"description": [obj[@"featured_abstract"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                          };
+                
+                //NSLog(@"Data received from search: %@", data);
+                
             }
             else if ([result[@"_type"] isEqualToString:@"pages"]) {
                 
-                if (!obj[@"loc"] || !obj[@"title"] || !obj[@"description"]) {
+                if (!obj[@"loc"] || [obj[@"loc"] length] == 0 || !obj[@"title"] || [obj[@"title"] length] == 0 || !obj[@"description"] || [obj[@"description"] length] == 0) {
                     continue;
                 }
                 
@@ -150,6 +155,8 @@
                          @"title": [obj[@"title"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
                          @"description": [obj[@"description"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                          };
+                
+                NSLog(@"Data received from search: %@", data);
             }
             else {
                 NSLog(@"Ignoring unknown result type %@", obj[@"_type"]);
@@ -189,7 +196,8 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return [self.searchResults count];
+    
+    return [self.searchResults count] > 0 ? [self.searchResults count] : 1;
 
 }
 
@@ -204,6 +212,30 @@
     rect.size.width = constraint.width;
     
     return rect;
+}
+
+- (UILabel *) getPageLabelForSearchResult:(CCSearchResult *)searchResult string:(NSString *)string font:(UIFont *)font yPosition:(CGFloat)yPosition {
+    
+    CGSize constraint;
+    CGFloat xPosition;
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    
+    // Useful for debuging - allows you to visualize exactually how label frames are positioned
+    //label.layer.borderColor = [UIColor blackColor].CGColor;
+    //label.layer.borderWidth = 1.0f;
+    
+    label.font = font;
+    label.text = string;
+    label.numberOfLines = 0;
+    label.lineBreakMode = NSLineBreakByWordWrapping;
+    
+    constraint = CGSizeMake(275.0, CGFLOAT_MAX);
+    xPosition = 9.0;
+    
+    label.frame = [self getLabelRectForString:string font:font constraint:constraint xPosition:xPosition yPosition:yPosition];
+    
+    return label;
     
 }
 
@@ -222,20 +254,42 @@
     label.text = string;
     label.numberOfLines = 0;
     label.lineBreakMode = NSLineBreakByWordWrapping;
-    CGFloat reduceWidthBy = yPosition > 15.0 ? 0.0 : 30.0;
     
-    if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
-        constraint = CGSizeMake(175.0 - reduceWidthBy, CGFLOAT_MAX);
+    if (![searchResult.data[@"headShot"] isEqual:[NSNull null]] && yPosition <= 130.0) {
+        constraint = CGSizeMake(175.0, CGFLOAT_MAX);
         xPosition = 109.0;
     }
     else {
-        constraint = CGSizeMake(275.0 - reduceWidthBy, CGFLOAT_MAX);
+        constraint = CGSizeMake(275.0, CGFLOAT_MAX);
         xPosition = 9.0;
     }
     
-    label.frame = [self getLabelRectForString:string font:NORMAL_FONT constraint:constraint xPosition:xPosition yPosition:yPosition];
+    label.frame = [self getLabelRectForString:string font:font constraint:constraint xPosition:xPosition yPosition:yPosition];
     
     return label;
+    
+}
+
+- (NSArray *) getPageFramesAtIndexPath:(NSIndexPath *)indexPath
+{
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
+    
+    CGFloat nextViewYPosition = 9.0;
+    NSMutableArray *viewList = [NSMutableArray new];
+    
+    if ([searchResult.data[@"title"] length] > 0) {
+        UILabel *titleLabel = [self getPageLabelForSearchResult:searchResult string:searchResult.data[@"title"] font:HEADER_FONT yPosition:nextViewYPosition];
+        [viewList addObject:titleLabel];
+        nextViewYPosition = titleLabel.frame.origin.y + titleLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    if ([searchResult.data[@"description"] length] > 0) {
+        //NSLog(@"Description: %@", searchResult.data[@"description"]);
+        UILabel *descriptionLabel = [self getPageLabelForSearchResult:searchResult string:searchResult.data[@"description"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:descriptionLabel];
+    }
+    
+    return viewList;
     
 }
 
@@ -248,9 +302,17 @@
     NSMutableArray *viewList = [NSMutableArray new];
     
     if (![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
-        UIImageView *headShot = [[UIImageView alloc] initWithFrame:CGRectMake(8.0, 17.0, 93.0, 119.0)];
+        
+        UIImageView *headShot = [[UIImageView alloc] initWithFrame:CGRectMake(8.0, 12.0, 93.0, 119.0)];
+        
         headShot.image = searchResult.data[@"headShot"];
         headShot.contentMode = UIViewContentModeScaleAspectFill;
+        headShot.clipsToBounds = YES;
+        
+        // Useful for debuging - allows you to visualize exactually how label frames are positioned
+        //headShot.layer.borderColor = [UIColor blackColor].CGColor;
+        //headShot.layer.borderWidth = 1.0f;
+        
         [viewList addObject:headShot];
     }
     
@@ -308,44 +370,67 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+
+    if ([self.searchResults count] == 0) {
+        return 70.0;
+    }
     
     CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
+    CGFloat height;
     
     if ([searchResult.type isEqualToString:@"directory"]) {
-        
         NSArray *labels = [self getDirectoryFramesAtIndexPath:indexPath];
         UILabel *lastLabel = (UILabel *)[labels lastObject];
+        height = lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
         
-        return lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    else if ([searchResult.type isEqualToString:@"featured"] || [searchResult.type isEqualToString:@"pages"]) {
+        NSArray *labels = [self getPageFramesAtIndexPath:indexPath];
+        UILabel *lastLabel = (UILabel *)[labels lastObject];
+        height = lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
+        if (searchResult.data[@"headShot"] && ![searchResult.data[@"headShot"] isEqual:[NSNull null]]) {
+            if (height < 125.0) {
+                height = 125.0;
+            }
+        }
     }
     else {
-        return 50.0;
+        return 70.0;
     }
+    
+    return height;
     
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
     UITableViewCell *cell;
+    NSArray *views;
+    
+    if ([self.searchResults count] > 0) {
+    
+        cell = [tableView dequeueReusableCellWithIdentifier:@"searchResult" forIndexPath:indexPath];
+    
+    }
+    else { // No results returned for query
+        cell = [tableView dequeueReusableCellWithIdentifier:@"noResults" forIndexPath:indexPath];
+        return cell;
+    }
+    
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
     
     if ([searchResult.type isEqualToString:@"directory"]) {
-        
-        cell = [tableView dequeueReusableCellWithIdentifier:@"directory" forIndexPath:indexPath];
-        
-        NSArray *views = [self getDirectoryFramesAtIndexPath:indexPath];
-        
-        for (UIView *view in views) {
-            [[cell contentView] addSubview:view];
-        }
-        
+        views = [self getDirectoryFramesAtIndexPath:indexPath];
     }
-    else if ([searchResult.type isEqualToString:@"pages"]) {
-        cell = [tableView dequeueReusableCellWithIdentifier:@"pages" forIndexPath:indexPath];
+    else if ([searchResult.type isEqualToString:@"pages"] || [searchResult.type isEqualToString:@"featured"]) {
+        views = [self getPageFramesAtIndexPath:indexPath];
     }
-    else if ([searchResult.type isEqualToString:@"featured"]) {
-        cell = [tableView dequeueReusableCellWithIdentifier:@"featured" forIndexPath:indexPath];
+    
+    [cell.contentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    
+    for (UIView *view in views) {
+        [[cell contentView] addSubview:view];
     }
     
     return cell;
