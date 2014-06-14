@@ -9,6 +9,7 @@
 #import "CCSearchMasterTableViewController.h"
 #import "AFNetworking.h"
 #import "CCSearchResult.h"
+#import "CCWebViewController.h"
 
 // Used to indicate amount of space between each view in a cell
 #define CELL_VIEW_MARGIN 2.0
@@ -156,6 +157,19 @@
                          @"description": [obj[@"description"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                          };
                 
+                NSLog(@"Data received from search: %@", data);
+            }
+            else if ([result[@"_type"] isEqualToString:@"courses"]) {
+                if (!obj[@"loc"] || [obj[@"loc"] length] == 0 || !obj[@"title"] || [obj[@"title"] length] == 0 || !obj[@"description"] || [obj[@"description"] length] == 0) {
+                    continue;
+                }
+
+                data = @{
+                        @"url": [obj[@"loc"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
+                        @"title": [obj[@"title"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
+                        @"description": [obj[@"description"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
+                };
+
                 NSLog(@"Data received from search: %@", data);
             }
             else {
@@ -437,16 +451,35 @@
     
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([self.searchResults count] == 0) {
+        return;
+    }
 
-/*
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
+
+    if ([searchResult.type isEqualToString:@"pages"] || [searchResult.type isEqualToString:@"featured"]) {
+        [self performSegueWithIdentifier:@"page" sender:self];
+    }
+    else if ([searchResult.type isEqualToString:@"directory"]) {
+        // TODO: Create new directory detail controller, perform segue to it
+    }
+
+}
+
+
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex: indexPath.row];
+    CCWebViewController *detail = [segue destinationViewController];
+    detail.url = searchResult.data[@"url"];
 }
-*/
+
 
 @end

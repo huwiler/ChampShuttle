@@ -155,7 +155,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mEs-H2-obW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1227" y="106"/>
+            <point key="canvasLocation" x="1220" y="373"/>
         </scene>
         <!--Blogs Master Table View Controller - Blogs-->
         <scene sceneID="uoX-u9-BVm">
@@ -386,10 +386,13 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" id="kCq-I2-iHy"/>
+                    <connections>
+                        <segue destination="dVX-lS-Ylh" kind="push" identifier="page" id="8nj-Qa-Jqq"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Glc-5K-x4S" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1696" y="-808"/>
+            <point key="canvasLocation" x="1697" y="-138"/>
         </scene>
         <!--View Controller - Shuttle Locations-->
         <scene sceneID="c7V-vy-Gp3">
@@ -404,7 +407,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rgW-H0-7Di" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1697" y="-189"/>
+            <point key="canvasLocation" x="1697" y="-738"/>
         </scene>
         <!--Tweets Master Table View Controller - Tweets-->
         <scene sceneID="LJQ-9l-g0y">
@@ -667,7 +670,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mD5-5m-NC0" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2480" y="473"/>
+            <point key="canvasLocation" x="2278" y="473"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="eRy-hj-k5a">
@@ -692,11 +695,87 @@
             </objects>
             <point key="canvasLocation" x="763" y="106"/>
         </scene>
+        <!--Table View Controller-->
+        <scene sceneID="gvs-TT-og8">
+            <objects>
+                <tableViewController id="VzW-zJ-Yjx" sceneMemberID="viewController">
+                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="Eea-Ea-e7a">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="sectionIndexBackgroundColor" white="0.94591126820000004" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="headercell" rowHeight="166" id="FNd-OU-8Hp">
+                                <rect key="frame" x="0.0" y="22" width="320" height="166"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="FNd-OU-8Hp" id="ocq-dG-lGo">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="165"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="champshuttle-header" id="YUd-U7-fzg">
+                                            <rect key="frame" x="0.0" y="-5" width="320" height="166"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                        </imageView>
+                                    </subviews>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="buttoncell" rowHeight="75" id="uaZ-ub-fPk">
+                                <rect key="frame" x="0.0" y="188" width="320" height="75"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="uaZ-ub-fPk" id="bz8-g6-dlq">
+                                    <rect key="frame" x="0.0" y="0.0" width="287" height="74"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <imageView userInteractionEnabled="NO" tag="1" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon-bus" id="149-sZ-TMk">
+                                            <rect key="frame" x="13" y="15" width="44" height="44"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                        </imageView>
+                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="2" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Shuttle Locations" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="rVo-CE-Xhy">
+                                            <rect key="frame" x="78" y="26" width="134" height="21"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" white="0.94591126820000004" alpha="1" colorSpace="calibratedWhite"/>
+                            </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="footercell" rowHeight="125" id="L0Q-58-JRg">
+                                <rect key="frame" x="0.0" y="263" width="320" height="125"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="L0Q-58-JRg" id="sVp-Am-FQU">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="124"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Suggestions or Feedback for this App?  Click here to share your thoughts!" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Wob-O5-tS3">
+                                            <rect key="frame" x="20" y="37" width="280" height="51"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" red="0.22352941179999999" green="0.22352941179999999" blue="0.22352941179999999" alpha="1" colorSpace="deviceRGB"/>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="VzW-zJ-Yjx" id="cNG-4G-jrF"/>
+                            <outlet property="delegate" destination="VzW-zJ-Yjx" id="2Mc-dS-fQ8"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="362-FP-JsF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1220" y="-220"/>
+        </scene>
     </scenes>
     <resources>
         <image name="accessory-push" width="8" height="11"/>
         <image name="champlain-library-twitter-icon" width="40" height="40"/>
         <image name="champlain-news-twitter-icon" width="40" height="40"/>
+        <image name="champshuttle-header" width="320" height="166"/>
         <image name="divider" width="307" height="1"/>
         <image name="icon-blog" width="44" height="44"/>
         <image name="icon-bus" width="44" height="44"/>
@@ -709,6 +788,6 @@
         <simulatedScreenMetrics key="destination"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="SXQ-Kp-rWf"/>
+        <segue reference="8nj-Qa-Jqq"/>
     </inferredMetricsTieBreakers>
 </document>
