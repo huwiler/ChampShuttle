@@ -7,9 +7,13 @@
 //
 
 #import "CCHomeTableViewController.h"
+#import <QuartzCore/QuartzCore.h>
+#import "AFNetworking.h"
+#import "CCSearchMasterTableViewController.h"
 
 @interface CCHomeTableViewController ()
-    @property (nonatomic, strong) NSArray *buttons;
+    @property (nonatomic, strong) NSMutableArray *buttons;
+    @property (strong, nonatomic) UISearchBar *searchBar;
 @end
 
 @implementation CCHomeTableViewController
@@ -27,20 +31,77 @@
 {
     [super viewDidLoad];
 
-    self.buttons = @[
-        @{
-            @"label"    : @"Shuttle Locations",
-            @"icon"     : [UIImage imageNamed:@"icon-bus"]
-        },
-        @{
-                @"label"    : @"Recent Tweets",
-                @"icon"     : [UIImage imageNamed:@"icon-twitter"]
-        },
-        @{
-                @"label"    : @"Recent Blog Posts",
-                @"icon"     : [UIImage imageNamed:@"icon-blog"]
-        },
-    ];
+    // Change the style of the status bar to be white
+    [self setNeedsStatusBarAppearanceUpdate];
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+
+    [self initButtons];
+    [self initSearchBar];
+
+    // On the homepage we display the number of blogs and tweets.  The format of the API calls
+    // to do this take a since parameter as a unix timestamp (number of seconds since midnight
+    // 1970 UTC).  Here we compose our since parameter value for our API calls as a String.
+    NSDate *today = [NSDate date];
+    NSDate *twoWeeksAgo = [today dateByAddingTimeInterval: -1209600.0];
+    NSString *twoWeeksAgoString = [NSString stringWithFormat:@"%f", [twoWeeksAgo timeIntervalSince1970]];
+
+    // We're using Mattt Thompson's AFNetworking rather than iOS NSURLConnection/NSURLSession
+    // APIs in order to keep the code clean and concise.  For documentation, see
+    // https://github.com/AFNetworking/AFNetworking
+    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+
+    // Both of these web services return JSON and take similar parameters:
+    //  - nocontent/true: causes only the unique mongodb id to be returned
+    //  - since/<timestamp>: causes the API to only return content published since <timestamp>
+    NSString *getBlogsAPIURL = [NSString stringWithFormat:@"https://forms.champlain.edu/pipes/blogs/nocontent/true/since/%@", twoWeeksAgoString];
+    NSString *getTwitterAPIURL = [NSString stringWithFormat:@"https://forms.champlain.edu/twitterapi/all/nocontent/true/since/%@", twoWeeksAgoString];
+
+    // Check for new Blog posts. If new posts exist, update model and reload table
+    [manager GET:getBlogsAPIURL parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        [self updateButton:@"Recent Blog Posts" key:@"count" value:[NSNumber numberWithLong:[responseObject count]]];
+        [self.tableView reloadData];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error: %@", error);
+    }];
+
+    // Check for new Twitter posts.  If new posts exist, update model and reload table
+    [manager GET:getTwitterAPIURL parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        [self updateButton:@"Recent Tweets" key:@"count" value:[NSNumber numberWithLong:[responseObject count]]];
+        [self.tableView reloadData];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error: %@", error);
+    }];
+
+
+}
+
+// Initialize model for Table's buttons
+- (void) initButtons {
+    self.buttons = [@[
+            [@{
+                    @"label" : @"Shuttle Locations",
+                    @"icon" : [UIImage imageNamed:@"icon-bus"],
+                    @"count" : [NSNull null]
+            } mutableCopy],
+            [@{
+                    @"label" : @"Recent Tweets",
+                    @"icon" : [UIImage imageNamed:@"icon-twitter"],
+                    @"count" : [NSNull null]
+            } mutableCopy],
+            [@{
+                    @"label" : @"Recent Blog Posts",
+                    @"icon" : [UIImage imageNamed:@"icon-blog"],
+                    @"count" : [NSNull null]
+            } mutableCopy],
+    ] mutableCopy];
+}
+
+- (void) updateButton:(NSString *)buttonLabel key:(NSString *)key value:(id)value {
+    for (NSMutableDictionary *button in self.buttons) {
+        if ([button[@"label"] isEqualToString:buttonLabel]) {
+            [button setObject:value forKey:key];
+        }
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -48,7 +109,7 @@
     [super didReceiveMemoryWarning];
 }
 
-#pragma mark - Table view data source
+#pragma mark - Table View
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -61,64 +122,140 @@
     return [self.buttons count] + 2;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+
+    if (indexPath.row == 0) {
+        return 165.0;
+    }
+
+    if (indexPath.row == [self.buttons count] + 1) {
+        return 125.0;
+    }
+
+    return 75.0;
+
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:<#@"reuseIdentifier"#> forIndexPath:indexPath];
+    UITableViewCell *cell;
+
+    if (indexPath.row == 0) { // If first row, show header
+
+        cell = [tableView dequeueReusableCellWithIdentifier:@"headercell" forIndexPath:indexPath];
+
+        // remove separator from first row
+        cell.separatorInset = UIEdgeInsetsMake(0.f, 0.f, 0.f, cell.bounds.size.width);
+
+    }
+    else if (indexPath.row == [self.buttons count] + 1) { // If last row, show footer
+        cell = [tableView dequeueReusableCellWithIdentifier:@"footercell" forIndexPath:indexPath];
+    }
+    else { // Otherwise, show button
+
+        long buttonIndex = indexPath.row - 1;
+        NSLog(@"buttonIndex: %li", buttonIndex);
+        NSDictionary *button = self.buttons[buttonIndex];
+
+        cell = [tableView dequeueReusableCellWithIdentifier:@"buttoncell" forIndexPath:indexPath];
+        UIImageView *icon = (UIImageView *)[cell viewWithTag:1];
+        UILabel *label = (UILabel *)[cell viewWithTag:2];
+
+        label.text = button[@"label"];
+        icon.image = button[@"icon"];
+
+        if (button[@"count"] != (id)[NSNull null]) {
+            int count = [(NSNumber *)button[@"count"] intValue];
+            UILabel *countLabel = (UILabel *)[cell viewWithTag:3];
+            if (count > 0 && countLabel.alpha != 1) {
+                UILabel *countLabel = (UILabel *)[cell viewWithTag:3];
+                countLabel.text = [NSString stringWithFormat:@"%i", count];
+                countLabel.layer.cornerRadius = 8;
+                [countLabel sizeToFit];
+                CGRect blogCountLabelRect = countLabel.frame;
+                blogCountLabelRect.size.height = 25;
+                blogCountLabelRect.size.width += 15;
+                blogCountLabelRect.origin.x = 275 - blogCountLabelRect.size.width;
+                countLabel.frame = blogCountLabelRect;
+
+                // Fade Label in
+                [UIView animateWithDuration:0.5 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{ countLabel.alpha = 1;} completion:nil];
+            }
+        }
+
+    }
     
     // Configure the cell...
     
     return cell;
 }
 
-
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
 
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+    BOOL clickedButton = indexPath.row != [self.buttons count] + 1 && indexPath.row != 0 ? YES : NO;
+
+    if (clickedButton) {
+        NSMutableDictionary *button = [self.buttons objectAtIndex:(indexPath.row - 1)];
+
+        if ([button[@"label"] isEqualToString:@"Shuttle Locations"]) {
+            [self performSegueWithIdentifier:@"shuttles" sender:self];
+        }
+        else if ([button[@"label"] isEqualToString:@"Recent Blog Posts"]) {
+            [self performSegueWithIdentifier:@"blogs" sender:self];
+        }
+        else if ([button[@"label"] isEqualToString:@"Recent Tweets"]) {
+            [self performSegueWithIdentifier:@"twitter" sender:self];
+        }
+    }
+
+    else if (indexPath.row == 0) {
+        NSLog(@"Header clicked");
+    }
+    else {
+        NSLog(@"Footer clicked");
+    }
+}
+
+#pragma mark - Search Bar
+
+- (void)initSearchBar {
+    // Add a Search Bar to the Navigation Controller on this page
+    self.searchBar = [UISearchBar new];
+    self.searchBar.delegate = self;
+    self.searchBar.placeholder = @"Search Champlain";
+    self.searchBar.showsBookmarkButton = NO;
+    [self.searchBar sizeToFit];
+    self.navigationItem.titleView = self.searchBar;
+}
+
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+    [searchBar setShowsCancelButton:YES animated:YES];
+}
+
+- (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar {
+    [searchBar setShowsCancelButton:NO animated:YES];
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    [searchBar resignFirstResponder];
+    [self performSegueWithIdentifier:@"search" sender:self];
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+    [searchBar resignFirstResponder];
 }
-*/
 
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
 #pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    if ([[segue identifier] isEqualToString:@"search"]) {
+        CCSearchMasterTableViewController *search = [segue destinationViewController];
+        search.query = self.searchBar.text;
+    }
 }
-*/
 
 @end

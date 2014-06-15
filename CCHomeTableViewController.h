@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CCHomeTableViewController : UITableViewController
+@interface CCHomeTableViewController : UITableViewController <UISearchBarDelegate>
 
 @end
