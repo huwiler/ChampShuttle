@@ -2,7 +2,7 @@ ChampShuttle
 ============
 
 <p align="center">
-  <img src="https://forms.champlain.edu/~huwiler/champshuttle-screenshot-small.jpg" />
+  <img src="https://forms.champlain.edu/~huwiler/champshuttle-screenshot-small2.jpg" />
 </p>
 
 Coming July '14!  The newly redesigned and retina optimized ChampShuttle app allows you to track Champlain College shuttles, keep current on Champlain news, and search Champlain resources.
