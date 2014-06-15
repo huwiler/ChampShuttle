@@ -80,7 +80,7 @@
     self.buttons = [@[
             [@{
                     @"label" : @"Shuttle Locations",
-                    @"icon" : [UIImage imageNamed:@"icon-bus"],
+                    @"icon" : [UIImage imageNamed:@"icon-shuttles"],
                     @"count" : [NSNull null]
             } mutableCopy],
             [@{
@@ -91,6 +91,26 @@
             [@{
                     @"label" : @"Recent Blog Posts",
                     @"icon" : [UIImage imageNamed:@"icon-blog"],
+                    @"count" : [NSNull null]
+            } mutableCopy],
+            [@{
+                    @"label" : @"Upcoming Events",
+                    @"icon" : [UIImage imageNamed:@"icon-events"],
+                    @"count" : [NSNull null]
+            } mutableCopy],
+            [@{
+                    @"label" : @"Courses",
+                    @"icon" : [UIImage imageNamed:@"icon-courses"],
+                    @"count" : [NSNull null]
+            } mutableCopy],
+            [@{
+                    @"label" : @"Directory",
+                    @"icon" : [UIImage imageNamed:@"icon-directory"],
+                    @"count" : [NSNull null]
+            } mutableCopy],
+            [@{
+                    @"label" : @"Menu",
+                    @"icon" : [UIImage imageNamed:@"icon-menu"],
                     @"count" : [NSNull null]
             } mutableCopy],
     ] mutableCopy];

@@ -3,12 +3,12 @@
     {
       "idiom" : "universal",
       "scale" : "1x",
-      "filename" : "icon-bus.png"
+      "filename" : "icon-shuttles.png"
     },
     {
       "idiom" : "universal",
       "scale" : "2x",
-      "filename" : "icon-bus@2x.png"
+      "filename" : "icon-shuttles@2x.png"
     }
   ],
   "info" : {
