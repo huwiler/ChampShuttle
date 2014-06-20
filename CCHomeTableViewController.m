@@ -37,6 +37,7 @@
 
     [self initButtons];
     [self initSearchBar];
+    [self initUserPreferences];
 
     // On the homepage we display the number of blogs and tweets.  The format of the API calls
     // to do this take a since parameter as a unix timestamp (number of seconds since midnight
@@ -73,6 +74,84 @@
     }];
 
 
+}
+
+- (void) initUserPreferences {
+    // Set user preference defaults if app has not run before
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"RanBefore"] != YES) {
+        //if (YES) {
+        
+        // Courses default user preferences:
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:YES
+         forKey:@"IncludeGraduate"
+         ];
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:NO
+         forKey:@"IncludeCPS"
+         ];
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:YES
+         forKey:@"IncludeUndergraduate"
+         ];
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:NO
+         forKey:@"CourseBrowseMode"
+         ];
+        
+        // Directory default user preferences:
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:YES
+         forKey:@"BrowseByDepartment"
+         ];
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:NO
+         forKey:@"BrowseByLocation"
+         ];
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:NO
+         forKey:@"DirectoryBrowseMode"
+         ];
+        
+        // Events default user preferences
+        
+        [[NSUserDefaults standardUserDefaults]
+         setBool:NO
+         forKey:@"EventsBlogMode"
+         ];
+        [[NSUserDefaults standardUserDefaults]
+         setBool:YES
+         forKey:@"EventsEventsMode"
+         ];
+        
+        // Event filters
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeAthletics"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeCampusCommunity"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeCampusWide"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeCareerServices"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeClass"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeDublin"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeExam"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeHousing"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeLead"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeMaintenance"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeMeeting"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeStudentAcademic"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EventsIncludeStudentSocial"];
+    }
+    [[NSUserDefaults standardUserDefaults]
+     setBool:YES
+     forKey:@"RanBefore"
+     ];
 }
 
 // Initialize model for Table's buttons
@@ -227,6 +306,9 @@
         }
         else if ([button[@"label"] isEqualToString:@"Recent Tweets"]) {
             [self performSegueWithIdentifier:@"twitter" sender:self];
+        }
+        else if ([button[@"label"] isEqualToString:@"Courses"]) {
+            [self performSegueWithIdentifier:@"courses" sender:self];
         }
     }
 

@@ -80,7 +80,7 @@
         //NSLog(@"JSON: %@", responseObject);
         
         // Draw label with rounded corners
-        self.blogCountLabel.text = [NSString stringWithFormat:@"%i", [responseObject count]];
+        self.blogCountLabel.text = [NSString stringWithFormat:@"%i", (int)[responseObject count]];
         self.blogCountLabel.layer.cornerRadius = 8;
         [self.blogCountLabel sizeToFit];
         CGRect blogCountLabelRect = self.blogCountLabel.frame;
@@ -100,7 +100,7 @@
     [manager GET:getTwitterAPIURL parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
         // Draw label with rounded corners
-        self.tweetCountLabel.text = [NSString stringWithFormat:@"%i", [responseObject count]];
+        self.tweetCountLabel.text = [NSString stringWithFormat:@"%lu", [responseObject count]];
         self.tweetCountLabel.layer.cornerRadius = 8;
         [self.tweetCountLabel sizeToFit];
         CGRect tweetCountLabelRect = self.tweetCountLabel.frame;
