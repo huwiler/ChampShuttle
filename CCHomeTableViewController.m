@@ -254,7 +254,6 @@
     else { // Otherwise, show button
 
         long buttonIndex = indexPath.row - 1;
-        NSLog(@"buttonIndex: %li", buttonIndex);
         NSDictionary *button = self.buttons[buttonIndex];
 
         cell = [tableView dequeueReusableCellWithIdentifier:@"buttoncell" forIndexPath:indexPath];
@@ -309,6 +308,9 @@
         }
         else if ([button[@"label"] isEqualToString:@"Courses"]) {
             [self performSegueWithIdentifier:@"courses" sender:self];
+        }
+        else if ([button[@"label"] isEqualToString:@"Directory"]) {
+            [self performSegueWithIdentifier:@"directory" sender:self];
         }
     }
 

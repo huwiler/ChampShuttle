@@ -20,7 +20,7 @@
     
     if ([[segue identifier] isEqualToString:@"courseDetail"]) {
         CCCourseDetailTableViewController __block *detailViewController = [segue destinationViewController];
-        detailViewController.course = [self.subject.courseController objectInListAtIndex:[self.tableView indexPathForSelectedRow].row];
+        detailViewController.course = [self.subject.courseController objectInListAtIndex:(unsigned)[self.tableView indexPathForSelectedRow].row];
         
         NSString *escapedCourseNumber = [detailViewController.course.number stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
         
@@ -121,7 +121,7 @@
         static NSString *CellIdentifier = @"courseCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         
-        CCCourse *courseAtIndex = [self.subject.courseController objectInListAtIndex:indexPath.row];
+        CCCourse *courseAtIndex = [self.subject.courseController objectInListAtIndex:(unsigned)indexPath.row];
         
         [[cell textLabel] setText:courseAtIndex.title];
         [[cell detailTextLabel] setText:courseAtIndex.number];

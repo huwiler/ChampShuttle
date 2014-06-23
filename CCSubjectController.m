@@ -25,7 +25,7 @@
 }
 
 - (unsigned)countOfList {
-    return [self.subjectList count];
+    return (unsigned)[self.subjectList count];
 }
 
 - (void)setSubjectList:(NSMutableArray *)subjectList {
