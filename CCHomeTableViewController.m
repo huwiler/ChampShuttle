@@ -312,6 +312,9 @@
         else if ([button[@"label"] isEqualToString:@"Directory"]) {
             [self performSegueWithIdentifier:@"directory" sender:self];
         }
+        else if ([button[@"label"] isEqualToString:@"Menu"]) {
+            [self performSegueWithIdentifier:@"menu" sender:self];
+        }
     }
 
     else if (indexPath.row == 0) {
