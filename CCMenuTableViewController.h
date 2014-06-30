@@ -8,11 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CCMenuTableViewController : UITableViewController
+@interface CCMenuTableViewController : UIViewController <UITableViewDelegate>
 
 @property (nonatomic, strong) NSMutableArray *days;
 @property (nonatomic, copy) NSString *weekTitle;
 @property (nonatomic) BOOL loading;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *viewWebsiteButton;
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
 
 @end

@@ -315,6 +315,9 @@
         else if ([button[@"label"] isEqualToString:@"Menu"]) {
             [self performSegueWithIdentifier:@"menu" sender:self];
         }
+        else if ([button[@"label"] isEqualToString:@"Upcoming Events"]) {
+            [self performSegueWithIdentifier:@"events" sender:self];
+        }
     }
 
     else if (indexPath.row == 0) {

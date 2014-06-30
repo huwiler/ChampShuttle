@@ -75,6 +75,7 @@
 }
 
 - (IBAction)save:(id)sender {
+    
     BOOL browseByDepartment = self.browseType.selectedSegmentIndex == 0 ? YES : NO;
     BOOL browseByLocation = self.browseType.selectedSegmentIndex == 1 ? YES : NO;
     
