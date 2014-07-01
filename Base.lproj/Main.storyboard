@@ -207,7 +207,7 @@
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="8bk-jz-RiS"/>
                         <barButtonItem title="Options" id="EgF-yK-Xyt">
                             <connections>
-                                <segue destination="92f-LK-4Ho" kind="modal" id="lfI-bp-Mbt"/>
+                                <segue destination="92f-LK-4Ho" kind="modal" modalTransitionStyle="crossDissolve" id="lfI-bp-Mbt"/>
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
@@ -874,7 +874,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mD5-5m-NC0" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3608" y="445"/>
+            <point key="canvasLocation" x="2664" y="461"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="eRy-hj-k5a">
@@ -953,11 +953,11 @@
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="0.94591126820000004" alpha="1" colorSpace="calibratedWhite"/>
                             </tableViewCell>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="footercell" rowHeight="125" id="L0Q-58-JRg">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="footercell" rowHeight="125" id="L0Q-58-JRg">
                                 <rect key="frame" x="0.0" y="257" width="320" height="125"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="L0Q-58-JRg" id="sVp-Am-FQU">
-                                    <rect key="frame" x="0.0" y="0.0" width="287" height="124"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="124"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Suggestions or Feedback for this App?  Click here to share your thoughts!" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Wob-O5-tS3">
@@ -973,6 +973,24 @@
                                 <connections>
                                     <segue destination="lyD-Bs-x7O" kind="push" identifier="directory" id="djm-We-NRv"/>
                                 </connections>
+                            </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="footercellexpanded" rowHeight="125" id="v6V-QL-aPu">
+                                <rect key="frame" x="0.0" y="382" width="320" height="125"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="v6V-QL-aPu" id="0Nl-QO-cYF">
+                                    <rect key="frame" x="0.0" y="0.0" width="287" height="124"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Suggestions or Feedback for this App?  Click here to share your thoughts!" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="HrN-UW-8eT">
+                                            <rect key="frame" x="20" y="37" width="280" height="51"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" red="0.22352941179999999" green="0.22352941179999999" blue="0.22352941179999999" alpha="1" colorSpace="deviceRGB"/>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -1302,7 +1320,7 @@
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="ujt-V7-qwD"/>
                         <barButtonItem title="Options" id="a11-Ri-S3i">
                             <connections>
-                                <segue destination="O3Y-Gk-WGa" kind="modal" identifier="showOptions" id="sW4-Qg-4ve"/>
+                                <segue destination="O3Y-Gk-WGa" kind="modal" identifier="showOptions" modalTransitionStyle="crossDissolve" id="sW4-Qg-4ve"/>
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
@@ -1983,7 +2001,7 @@
                     <navigationItem key="navigationItem" title="Events" id="VVB-gd-bN7">
                         <barButtonItem key="rightBarButtonItem" title="Options" id="MVB-y8-zMx">
                             <connections>
-                                <segue destination="yl4-pV-8lJ" kind="modal" identifier="showOptions" id="mta-9h-QmZ"/>
+                                <segue destination="yl4-pV-8lJ" kind="modal" identifier="showOptions" customClass="BlurryModalSegue" modalTransitionStyle="crossDissolve" id="mta-9h-QmZ"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -2001,19 +2019,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="LTD-1F-4nn">
+                            <tableView opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="LTD-1F-4nn">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="436"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                <color key="sectionIndexBackgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <color key="sectionIndexTrackingBackgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <imageView key="tableFooterView" userInteractionEnabled="NO" contentMode="center" image="gear" id="12I-ot-TaU">
                                     <rect key="frame" x="0.0" y="109" width="320" height="201"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </imageView>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="eventFilterCell" id="ZXt-fk-0Mh">
+                                    <tableViewCell opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="eventFilterCell" id="ZXt-fk-0Mh">
                                         <rect key="frame" x="0.0" y="55" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ZXt-fk-0Mh" id="11o-52-yVj">
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ZXt-fk-0Mh" id="11o-52-yVj">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
@@ -2024,11 +2045,13 @@
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="2" contentMode="left" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="10" id="LOo-VV-MhL">
                                                     <rect key="frame" x="87" y="11" width="200" height="21"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <color key="highlightedColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 </label>
                                             </subviews>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </prototypes>
@@ -2055,7 +2078,6 @@
                                 </items>
                             </toolbar>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="lPS-td-Kni"/>
