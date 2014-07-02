@@ -10,4 +10,8 @@
 
 @interface CCHomeTableViewController : UITableViewController <UISearchBarDelegate>
 
+- (IBAction)cancelFeedback:(id)sender;
+- (IBAction)sendFeedback:(id)sender;
+- (void)showFeedback;
+
 @end

@@ -14,6 +14,7 @@
 @interface CCHomeTableViewController ()
     @property (nonatomic, strong) NSMutableArray *buttons;
     @property (strong, nonatomic) UISearchBar *searchBar;
+    @property (nonatomic) BOOL isFeedbackFormDisplayed;
 @end
 
 @implementation CCHomeTableViewController
@@ -27,9 +28,46 @@
     return self;
 }
 
+- (IBAction)cancelFeedback:(id)sender
+{
+    self.isFeedbackFormDisplayed = NO;
+    [self refreshFooter];
+}
+- (IBAction)sendFeedback:(id)sender
+{
+    self.isFeedbackFormDisplayed = NO;
+    [self refreshFooter];
+}
+- (void)showFeedback
+{
+    self.isFeedbackFormDisplayed = YES;
+    [self refreshFooter];
+}
+
+- (void) refreshFooter
+{
+    [self.tableView beginUpdates];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[self.buttons count] + 1 inSection:0];
+    [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    [self.tableView endUpdates];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    /*CGRect frameTop = self.tableView.bounds;
+    CGRect frameBottom = self.tableView.bounds;
+    frameTop.origin.y = -frameTop.size.height;
+    frameBottom.origin.y = frameBottom.size.height;
+    UIView* grayViewTop = [[UIView alloc] initWithFrame:frameTop];
+    UIView* grayViewBottom = [[UIView alloc] initWithFrame:frameBottom];
+    grayViewTop.backgroundColor = [UIColor darkGrayColor];
+    grayViewBottom.backgroundColor = [UIColor darkGrayColor];
+    [self.tableView addSubview:grayViewTop];
+    [self.tableView addSubview:grayViewBottom];*/
+    
+    self.isFeedbackFormDisplayed = NO;
 
     // Change the style of the status bar to be white
     [self setNeedsStatusBarAppearanceUpdate];
@@ -192,6 +230,11 @@
                     @"icon" : [UIImage imageNamed:@"icon-menu"],
                     @"count" : [NSNull null]
             } mutableCopy],
+            [@{
+                    @"label" : @"Contribute",
+                    @"icon" : [UIImage imageNamed:@"icon-keyboard"],
+                    @"count" : [NSNull null]
+            } mutableCopy]
     ] mutableCopy];
 }
 
@@ -229,12 +272,19 @@
     }
 
     if (indexPath.row == [self.buttons count] + 1) {
-        return 125.0;
+        if (! self.isFeedbackFormDisplayed) {
+            return 125.0;
+        }
+        else {
+            return 300.0;
+        }
     }
 
     return 75.0;
 
 }
+
+
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -249,7 +299,15 @@
 
     }
     else if (indexPath.row == [self.buttons count] + 1) { // If last row, show footer
-        cell = [tableView dequeueReusableCellWithIdentifier:@"footercell" forIndexPath:indexPath];
+        if (!self.isFeedbackFormDisplayed) {
+            cell = [tableView dequeueReusableCellWithIdentifier:@"footercell" forIndexPath:indexPath];
+        }
+        else {
+            cell = [tableView dequeueReusableCellWithIdentifier:@"footercellexpanded" forIndexPath:indexPath];
+        }
+        
+        // remove separator from last row
+        cell.separatorInset = UIEdgeInsetsMake(0.f, 0.f, 0.f, cell.bounds.size.width);
     }
     else { // Otherwise, show button
 
@@ -320,11 +378,17 @@
         }
     }
 
-    else if (indexPath.row == 0) {
-        NSLog(@"Header clicked");
+    else if (indexPath.row == 0) { // Header clicked
+        
     }
-    else {
-        NSLog(@"Footer clicked");
+    else { // Footer clicked
+        
+        // display feedback form in footer
+        if (!self.isFeedbackFormDisplayed) {
+            [self showFeedback];
+            [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        }
+        
     }
 }
 

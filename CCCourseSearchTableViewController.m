@@ -237,11 +237,12 @@
     [searchBar resignFirstResponder];
 }
 
-// UITableView Delegate Methods
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    // Remove black horizontal divider between nav and view in order to blend search into nav
+    //self.navigationController.navigationBar.translucent = NO;
     
     self.courseMode = SEARCH;
     
@@ -258,9 +259,6 @@
 
 - (void)viewDidUnload
 {
-    [self setSearchBar:nil];
-    [self setSearchButton:nil];
-    [self setBrowseButton:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;

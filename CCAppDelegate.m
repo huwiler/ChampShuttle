@@ -29,7 +29,6 @@
     [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -60)
                                                          forBarMetrics:UIBarMetricsDefault];
     
-    
     // Automatically show Network Activity Indicator in status bar when AFNetworking requests are made
     AFNetworkActivityIndicatorManager.sharedManager.enabled = YES;
     
