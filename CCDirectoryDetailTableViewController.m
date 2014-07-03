@@ -27,6 +27,8 @@
     self.phoneCell.textLabel.text = @"Phone";
     self.phoneCell.detailTextLabel.text = self.person.phone;
     
+    // Set Navigation bar title to person's name
+    self.navigationItem.title = self.person.name;
     
     // Each time the person detail page is loaded, save him/her to recents so they appear
     //  in quicklinks.

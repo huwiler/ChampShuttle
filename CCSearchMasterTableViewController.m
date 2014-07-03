@@ -7,9 +7,11 @@
 //
 
 #import "CCSearchMasterTableViewController.h"
+#import "CCDirectoryDetailTableViewController.h"
 #import "AFNetworking.h"
 #import "CCSearchResult.h"
 #import "CCWebViewController.h"
+#import "CCPerson.h"
 
 // Used to indicate amount of space between each view in a cell
 #define CELL_VIEW_MARGIN 2.0
@@ -65,12 +67,16 @@
     
     //NSLog(@"Getting to AFHTTPRequestOperation with %@", searchAPIURL);
     
+    self.navigationItem.title = @"...";
+    
     [manager GET:searchAPIURL parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
         //NSLog(@"Getting to response handler.");
         
         NSDictionary *response = (NSDictionary *)responseObject;
         NSArray *hits = response[@"hits"][@"hits"];
+        
+        self.navigationItem.title = [NSString stringWithFormat:@"%lu Results", [hits count]];
         
         //NSLog(@"hits: %@", hits);
         
@@ -396,7 +402,6 @@
         NSArray *labels = [self getDirectoryFramesAtIndexPath:indexPath];
         UILabel *lastLabel = (UILabel *)[labels lastObject];
         height = lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
-        
     }
     else if ([searchResult.type isEqualToString:@"featured"] || [searchResult.type isEqualToString:@"pages"]) {
         NSArray *labels = [self getPageFramesAtIndexPath:indexPath];
@@ -423,9 +428,7 @@
     NSArray *views;
     
     if ([self.searchResults count] > 0) {
-    
         cell = [tableView dequeueReusableCellWithIdentifier:@"searchResult" forIndexPath:indexPath];
-    
     }
     else { // No results returned for query
         cell = [tableView dequeueReusableCellWithIdentifier:@"noResults" forIndexPath:indexPath];
@@ -464,11 +467,10 @@
     }
     else if ([searchResult.type isEqualToString:@"directory"]) {
         // TODO: Create new directory detail controller, perform segue to it
+        [self performSegueWithIdentifier:@"directory" sender:self];
     }
 
 }
-
-
 
 #pragma mark - Navigation
 
@@ -477,8 +479,30 @@
 {
     NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
     CCSearchResult *searchResult = [self.searchResults objectAtIndex: indexPath.row];
-    CCWebViewController *detail = [segue destinationViewController];
-    detail.url = searchResult.data[@"url"];
+    
+    
+    if ([searchResult.type isEqualToString:@"pages"]) {
+        CCWebViewController *detail = [segue destinationViewController];
+        detail.url = searchResult.data[@"url"];
+    }
+    else if ([searchResult.type isEqualToString:@"directory"]) {
+        
+        CCDirectoryDetailTableViewController *detail = [segue destinationViewController];
+        
+        NSString *name = [NSString stringWithFormat:@"%@ %@", [searchResult.data objectForKey:@"firstName"], [searchResult.data objectForKey:@"lastName"]];
+        NSString *title = [(NSArray *)[searchResult.data objectForKey:@"title"] objectAtIndex:0];
+        NSString *department = [searchResult.data objectForKey:@"department"];
+        NSString *email = [searchResult.data objectForKey:@"email"];
+        NSString *phone = [searchResult.data objectForKey:@"phone"];
+        NSString *building = [searchResult.data objectForKey:@"office"];
+        
+        CCPerson *person = [[CCPerson alloc] initWithName:name title:title department:department email:email phone:phone building:building];
+        
+        NSLog(@"person: %@, data: %@", person, searchResult.data);
+        
+        detail.person = person;
+        
+    }
 }
 
 
