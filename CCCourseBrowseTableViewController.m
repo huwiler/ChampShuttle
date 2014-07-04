@@ -62,7 +62,7 @@
             
             // Turn off activity indicator
             detailViewController.loading = NO;
-            [detailViewController.navActivityIndicator stopAnimating];
+            //[detailViewController.navActivityIndicator stopAnimating];
             
             // Refresh Table UI
             [detailViewController.tableView reloadData];

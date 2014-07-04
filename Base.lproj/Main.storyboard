@@ -595,6 +595,7 @@
                     <navigationItem key="navigationItem" id="kCq-I2-iHy"/>
                     <connections>
                         <segue destination="dVX-lS-Ylh" kind="push" identifier="page" id="8nj-Qa-Jqq"/>
+                        <segue destination="QhD-ri-MZQ" kind="push" identifier="course" id="3U2-9j-2fV"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Glc-5K-x4S" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2127,8 +2128,8 @@
         <simulatedScreenMetrics key="destination"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="8nj-Qa-Jqq"/>
         <segue reference="zBn-lZ-2zm"/>
-        <segue reference="p4P-dX-pIL"/>
+        <segue reference="3U2-9j-2fV"/>
+        <segue reference="8nj-Qa-Jqq"/>
     </inferredMetricsTieBreakers>
 </document>

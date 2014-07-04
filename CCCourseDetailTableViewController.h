@@ -8,11 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import "CCCourse.h"
+#import "CCTableViewController.h"
 
-@interface CCCourseDetailTableViewController : UITableViewController
+@interface CCCourseDetailTableViewController : CCTableViewController
 
 @property (nonatomic, strong) CCCourse *course;
-@property (strong, nonatomic) UIActivityIndicatorView *navActivityIndicator;
+@property (nonatomic, copy) NSString *apiUrl;
+//@property (strong, nonatomic) UIActivityIndicatorView *navActivityIndicator;
 @property (nonatomic) BOOL loading;
 @property (nonatomic) BOOL error;
 

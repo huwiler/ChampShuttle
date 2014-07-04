@@ -9,6 +9,7 @@
 #import "CCCourseDetailTableViewController.h"
 #import "CCCourseDetailTableViewController.h"
 #import "CCCourseSectionDetailTableViewController.h"
+#import "AFNetworking.h"
 #import "CCCourse.h"
 #import "CCSection.h"
 
@@ -29,12 +30,71 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    if (self.apiUrl && !self.course) {
+        
+        self.loading = YES;
+        [self showLoading];
+        
+        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+        
+        // Check for new Blog posts. If new posts exist, update model and reload table
+        [manager GET:self.apiUrl parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            //CCCourseController *courseController = [[CCCourseController alloc] init];
+            
+            NSDictionary *courseDictionary = [[responseObject objectForKey:@"items"] objectAtIndex:0];
+            NSString *description = [courseDictionary objectForKey:@"description"];
+            NSString *prereq = [courseDictionary objectForKey:@"prereq"];
+            NSString *title = [courseDictionary objectForKey:@"title"];
+            NSString *number = [courseDictionary objectForKey:@"id"];
+            NSString *subject = [courseDictionary objectForKey:@"subject"];
+            int credits = [[courseDictionary objectForKey:@"credit"] intValue];
+            
+            self.course = [[CCCourse alloc] initWithTitle:title description:description number:number subject:subject credits:credits prereq:prereq sections:[NSMutableArray array]];
+            
+            // Date formatter used to extract start and end section dates properly
+            NSDateFormatter *df = [[NSDateFormatter alloc] init];
+            [df setDateStyle:NSDateFormatterShortStyle];
+            [df setDateFormat:@"MM/dd/yy"];
+            
+            for (NSDictionary *semesterDictionary in [courseDictionary objectForKey:@"children"]) {
+                NSString *semester = [semesterDictionary objectForKey:@"id"];
+                
+                for (NSDictionary *sectionDictionary in [semesterDictionary objectForKey:@"children"]) {
+                    
+                    NSString *number = [sectionDictionary objectForKey:@"number"];
+                    NSString *instructorFirstName = [sectionDictionary objectForKey:@"instructor_fname"];
+                    NSString *instructorLastName = [sectionDictionary objectForKey:@"instructor_lname"];
+                    NSString *days = [sectionDictionary objectForKey:@"days"];
+                    NSString *times = [sectionDictionary objectForKey:@"times"];
+                    NSDate *startDate = [df dateFromString:[sectionDictionary objectForKey:@"start_date"]];
+                    NSDate *endDate = [df dateFromString:[sectionDictionary objectForKey:@"end_date"]];
+                    int seats = [[sectionDictionary objectForKey:@"openseats"] intValue];
+                    
+                    CCSection *section = [[CCSection alloc] initWithNumber:number instructorFirstName:instructorFirstName instructorLastName:instructorLastName days:days times:times startDate:startDate endDate:endDate semester:semester seats:seats];
+                    
+                    [self.course addSection:section];
+                    
+                }
+            }
+            
+            [self hideLoading];
+            self.loading = NO;
+            
+            [self.tableView reloadData];
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error: %@", error);
+        }];
+    }
+    
 
-    if (self.navActivityIndicator == nil) {
+    /*if (self.navActivityIndicator == nil) {
         self.navActivityIndicator = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
         UIBarButtonItem *barButton = [[UIBarButtonItem alloc] initWithCustomView:self.navActivityIndicator];
         [self navigationItem].rightBarButtonItem = barButton;
-    }
+    }*/
+    
 }
 
 - (void)viewDidUnload
@@ -68,7 +128,6 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0 && indexPath.row == 3) {
-        //nstrainedToSize:CGSizeMake(self.tableView.frame.size.width - PADDING * 3, 1000.0f)];
         CGSize textSize = [self.course.description sizeWithFont:[UIFont systemFontOfSize:14.0f] constrainedToSize:CGSizeMake(self.tableView.frame.size.width - 10.0f * 3, 1000.0f)];
         return textSize.height + 10.0f * 3;
     }

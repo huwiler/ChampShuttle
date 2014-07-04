@@ -6,8 +6,10 @@
 //  Copyright (c) 2014 Champlain College. All rights reserved.
 //
 
+#import <CoreText/CoreText.h>
 #import "CCSearchMasterTableViewController.h"
 #import "CCDirectoryDetailTableViewController.h"
+#import "CCCourseDetailTableViewController.h"
 #import "AFNetworking.h"
 #import "CCSearchResult.h"
 #import "CCWebViewController.h"
@@ -63,7 +65,7 @@
     // Retrieve blogs from blogs API
     // See https://github.com/AFNetworking/AFNetworking
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    NSString *searchAPIURL = [NSString stringWithFormat:@"http://searchapi.champlain.edu/search.php?pagesize=50&highlight=1&q=%@&i=pages%%2Cdirectory%%2Ccourses%%2Cevents&nofeatured=0&pageindex=0", escapedQuery];
+    NSString *searchAPIURL = [NSString stringWithFormat:@"http://searchapi.champlain.edu/search.php?pagesize=100&highlight=1&q=%@&i=pages%%2Cdirectory%%2Ccourses%%2Cevents&nofeatured=0&pageindex=0", escapedQuery];
     
     //NSLog(@"Getting to AFHTTPRequestOperation with %@", searchAPIURL);
     
@@ -163,17 +165,28 @@
                          @"description": [obj[@"description"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                          };
                 
-                NSLog(@"Data received from search: %@", data);
+                //NSLog(@"Data received from search: %@", data);
             }
             else if ([result[@"_type"] isEqualToString:@"courses"]) {
-                if (!obj[@"loc"] || [obj[@"loc"] length] == 0 || !obj[@"title"] || [obj[@"title"] length] == 0 || !obj[@"description"] || [obj[@"description"] length] == 0) {
+                
+                NSLog(@"Found course.");
+                
+                if (!obj[@"loc"] || [obj[@"loc"] length] == 0 || !obj[@"title"] || [obj[@"title"] length] == 0 || !obj[@"abstract"] || [obj[@"abstract"] length] == 0) {
                     continue;
                 }
-
+                
+                NSString *url = [obj[@"loc"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                NSArray *urlParts = [url componentsSeparatedByString:@"/"];
+                NSString *urlCoursePart = [urlParts objectAtIndex:[urlParts count]-1];
+                NSString *apiUrl = [NSString stringWithFormat:@"http://classlist.champlain.edu/api3/course/number/%@", urlCoursePart];
+                NSString *number = [urlCoursePart stringByReplacingOccurrencesOfString:@"_" withString:@" "];
+                
                 data = @{
-                        @"url": [obj[@"loc"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
+                        @"apiUrl": apiUrl,
+                        @"number": number,
+                        @"credit": [obj[@"credit"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
                         @"title": [obj[@"title"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
-                        @"description": [obj[@"description"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
+                        @"description": [obj[@"abstract"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                 };
 
                 NSLog(@"Data received from search: %@", data);
@@ -287,6 +300,40 @@
     label.frame = [self getLabelRectForString:string font:font constraint:constraint xPosition:xPosition yPosition:yPosition];
     
     return label;
+    
+}
+
+- (NSArray *) getCoursesFramesAtIndexPath:(NSIndexPath *)indexPath
+{
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
+    
+    CGFloat nextViewYPosition = 9.0;
+    NSMutableArray *viewList = [NSMutableArray new];
+    
+    if ([searchResult.data[@"title"] length] > 0) {
+        UILabel *titleLabel = [self getPageLabelForSearchResult:searchResult string:searchResult.data[@"title"] font:HEADER_FONT yPosition:nextViewYPosition];
+        [viewList addObject:titleLabel];
+        nextViewYPosition = titleLabel.frame.origin.y + titleLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    if ([searchResult.data[@"number"] length] > 0 && [searchResult.data[@"credit"] length] > 0) {
+        NSString *info = [NSString stringWithFormat:@"Course Number: %@, Credits: %@", searchResult.data[@"number"], searchResult.data[@"credit"]];
+        CGFloat size = 11;
+        UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Italic" size:size];
+        if (font == nil && ([UIFontDescriptor class] != nil)) {
+            font = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("HelveticaNeue-Italic"), size, NULL);
+        }
+        UILabel *infoLabel = [self getPageLabelForSearchResult:searchResult string:info font:font yPosition:nextViewYPosition];
+        [viewList addObject:infoLabel];
+        nextViewYPosition = infoLabel.frame.origin.y + infoLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    if ([searchResult.data[@"description"] length] > 0) {
+        UILabel *descriptionLabel = [self getPageLabelForSearchResult:searchResult string:searchResult.data[@"description"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:descriptionLabel];
+    }
+    
+    return viewList;
     
 }
 
@@ -413,6 +460,11 @@
             }
         }
     }
+    else if ([searchResult.type isEqualToString:@"courses"]) {
+        NSArray *labels = [self getCoursesFramesAtIndexPath:indexPath];
+        UILabel *lastLabel = (UILabel *)[labels lastObject];
+        height = lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
     else {
         return 70.0;
     }
@@ -443,6 +495,9 @@
     else if ([searchResult.type isEqualToString:@"pages"] || [searchResult.type isEqualToString:@"featured"]) {
         views = [self getPageFramesAtIndexPath:indexPath];
     }
+    else if ([searchResult.type isEqualToString:@"courses"]) {
+        views = [self getCoursesFramesAtIndexPath:indexPath];
+    }
     
     [cell.contentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
@@ -466,8 +521,10 @@
         [self performSegueWithIdentifier:@"page" sender:self];
     }
     else if ([searchResult.type isEqualToString:@"directory"]) {
-        // TODO: Create new directory detail controller, perform segue to it
         [self performSegueWithIdentifier:@"directory" sender:self];
+    }
+    else if ([searchResult.type isEqualToString:@"courses"]) {
+        [self performSegueWithIdentifier:@"course" sender:self];
     }
 
 }
@@ -502,6 +559,10 @@
         
         detail.person = person;
         
+    }
+    else if ([searchResult.type isEqualToString:@"courses"]) {
+        CCCourseDetailTableViewController *detail = [segue destinationViewController];
+        detail.apiUrl = [searchResult.data objectForKey:@"apiUrl"];
     }
 }
 
