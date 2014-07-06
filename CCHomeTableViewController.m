@@ -308,6 +308,9 @@
         
         // remove separator from last row
         cell.separatorInset = UIEdgeInsetsMake(0.f, 0.f, 0.f, cell.bounds.size.width);
+        
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        
     }
     else { // Otherwise, show button
 
@@ -386,7 +389,9 @@
         // display feedback form in footer
         if (!self.isFeedbackFormDisplayed) {
             [self showFeedback];
-            [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+            //[self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+            UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+            [[cell viewWithTag:2] becomeFirstResponder];
         }
         
     }

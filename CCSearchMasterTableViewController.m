@@ -65,11 +65,14 @@
     // Retrieve blogs from blogs API
     // See https://github.com/AFNetworking/AFNetworking
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    NSString *searchAPIURL = [NSString stringWithFormat:@"http://searchapi.champlain.edu/search.php?pagesize=100&highlight=1&q=%@&i=pages%%2Cdirectory%%2Ccourses%%2Cevents&nofeatured=0&pageindex=0", escapedQuery];
+    //NSString *searchAPIURL = [NSString stringWithFormat:@"http://searchapi.champlain.edu/search.php?pagesize=100&highlight=1&q=%@&i=pages%%2Cdirectory%%2Ccourses%%2Cevents&nofeatured=0&pageindex=0", escapedQuery];
+    NSString *searchAPIURL = [NSString stringWithFormat:@"http://searchapi.champlain.edu/search.php?pagesize=100&highlight=0&q=%@&i=events&nofeatured=1&pageindex=0", escapedQuery];
+    
+    //i=news%2Cblogs%2Cexternal%2Cpages%2Cmicrosites%2Cevents%2Ccourses%2Cdirectory
     
     //NSLog(@"Getting to AFHTTPRequestOperation with %@", searchAPIURL);
     
-    self.navigationItem.title = @"...";
+    self.navigationItem.title = @"Loading ...";
     
     [manager GET:searchAPIURL parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
@@ -189,7 +192,39 @@
                         @"description": [obj[@"abstract"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                 };
 
+                //NSLog(@"Data received from search: %@", data);
+            }
+            else if ([result[@"_type"] isEqualToString:@"news"]) {
+                //NSString *copy = [obj[@"copy"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                NSString *description = [obj[@"abstract"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                NSString *title = [obj[@"title"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                NSString *url = [obj[@"loc"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                
+                data = @{
+                         @"title": title,
+                         @"description": description,
+                         @"url": url//,
+                         //@"copy": copy
+                         };
+                
                 NSLog(@"Data received from search: %@", data);
+            }
+            else if ([result[@"_type"] isEqualToString:@"events"]) {
+                
+                NSDateFormatter *df = [[NSDateFormatter alloc] init];
+                [df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
+                
+                NSString *title = [obj[@"title"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                NSString *url = [obj[@"loc"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                NSString *url = [obj[@"loc"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                
+                data = @{
+                         @"title": title,
+                         @"description": description,
+                         @"url": url//,
+                         //@"copy": copy
+                         };
+
             }
             else {
                 NSLog(@"Ignoring unknown result type %@", obj[@"_type"]);
@@ -300,6 +335,38 @@
     label.frame = [self getLabelRectForString:string font:font constraint:constraint xPosition:xPosition yPosition:yPosition];
     
     return label;
+    
+}
+
+- (NSArray *) getNewsFramesAtIndexPath:(NSIndexPath *)indexPath
+{
+    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
+    
+    CGFloat nextViewYPosition = 9.0;
+    NSMutableArray *viewList = [NSMutableArray new];
+    
+    if ([searchResult.data[@"title"] length] > 0) {
+        UILabel *titleLabel = [self getPageLabelForSearchResult:searchResult string:searchResult.data[@"title"] font:HEADER_FONT yPosition:nextViewYPosition];
+        [viewList addObject:titleLabel];
+        nextViewYPosition = titleLabel.frame.origin.y + titleLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
+    
+    NSString *info = @"Champlain News";
+    CGFloat size = 11;
+    UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Italic" size:size];
+    if (font == nil && ([UIFontDescriptor class] != nil)) {
+        font = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("HelveticaNeue-Italic"), size, NULL);
+    }
+    UILabel *infoLabel = [self getPageLabelForSearchResult:searchResult string:info font:font yPosition:nextViewYPosition];
+    [viewList addObject:infoLabel];
+    nextViewYPosition = infoLabel.frame.origin.y + infoLabel.frame.size.height + CELL_VIEW_MARGIN;
+    
+    if ([searchResult.data[@"description"] length] > 0) {
+        UILabel *descriptionLabel = [self getPageLabelForSearchResult:searchResult string:searchResult.data[@"description"] font:NORMAL_FONT yPosition:nextViewYPosition];
+        [viewList addObject:descriptionLabel];
+    }
+    
+    return viewList;
     
 }
 
@@ -465,6 +532,11 @@
         UILabel *lastLabel = (UILabel *)[labels lastObject];
         height = lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
     }
+    else if ([searchResult.type isEqualToString:@"news"]) {
+        NSArray *labels = [self getNewsFramesAtIndexPath:indexPath];
+        UILabel *lastLabel = (UILabel *)[labels lastObject];
+        height = lastLabel.frame.origin.y + lastLabel.frame.size.height + CELL_VIEW_MARGIN;
+    }
     else {
         return 70.0;
     }
@@ -477,26 +549,45 @@
 {
     
     UITableViewCell *cell;
+    UILabel *typeLabel;
     NSArray *views;
+    CCSearchResult *searchResult;
     
     if ([self.searchResults count] > 0) {
-        cell = [tableView dequeueReusableCellWithIdentifier:@"searchResult" forIndexPath:indexPath];
+        typeLabel = (UILabel *)[cell viewWithTag:2];
+        searchResult = [self.searchResults objectAtIndex:indexPath.row];
+        if ([searchResult.type isEqualToString:@"events"]) {
+            cell = [tableView dequeueReusableCellWithIdentifier:@"events" forIndexPath:indexPath];
+        }
+        else {
+            cell = [tableView dequeueReusableCellWithIdentifier:@"searchResult" forIndexPath:indexPath];
+            
+        }
     }
     else { // No results returned for query
         cell = [tableView dequeueReusableCellWithIdentifier:@"noResults" forIndexPath:indexPath];
         return cell;
     }
     
-    CCSearchResult *searchResult = [self.searchResults objectAtIndex:indexPath.row];
-    
     if ([searchResult.type isEqualToString:@"directory"]) {
         views = [self getDirectoryFramesAtIndexPath:indexPath];
+        typeLabel.text = @"Directory";
     }
-    else if ([searchResult.type isEqualToString:@"pages"] || [searchResult.type isEqualToString:@"featured"]) {
+    else if ([searchResult.type isEqualToString:@"pages"]) {
         views = [self getPageFramesAtIndexPath:indexPath];
+        typeLabel.text = @"";
+    }
+    else if ([searchResult.type isEqualToString:@"featured"]) {
+        views = [self getPageFramesAtIndexPath:indexPath];
+        typeLabel.text = @"Featured";
     }
     else if ([searchResult.type isEqualToString:@"courses"]) {
         views = [self getCoursesFramesAtIndexPath:indexPath];
+        typeLabel.text = @"Course";
+    }
+    else if ([searchResult.type isEqualToString:@"news"]) {
+        views = [self getCoursesFramesAtIndexPath:indexPath];
+        typeLabel.text = @"News";
     }
     
     [cell.contentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -526,6 +617,9 @@
     else if ([searchResult.type isEqualToString:@"courses"]) {
         [self performSegueWithIdentifier:@"course" sender:self];
     }
+    else if ([searchResult.type isEqualToString:@"news"]) {
+        [self performSegueWithIdentifier:@"page" sender:self];
+    }
 
 }
 
@@ -538,7 +632,7 @@
     CCSearchResult *searchResult = [self.searchResults objectAtIndex: indexPath.row];
     
     
-    if ([searchResult.type isEqualToString:@"pages"]) {
+    if ([searchResult.type isEqualToString:@"pages"] || [searchResult.type isEqualToString:@"news"]) {
         CCWebViewController *detail = [segue destinationViewController];
         detail.url = searchResult.data[@"url"];
     }
